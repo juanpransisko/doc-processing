@@ -15,7 +15,6 @@ def main():
     }
     save_data_yaml(config)
 
-    # Train YOLOv8 OBB
     model = train_yolo_model(
         "dataset_25_obb/data.yaml", model_arch="yolov8n-obb.pt", epochs=50
     )

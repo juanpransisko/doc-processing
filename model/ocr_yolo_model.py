@@ -12,9 +12,7 @@ def save_data_yaml(config: dict, path="dataset_25_obb/data.yaml"):
         yaml.dump(config, f)
 
 
-def train_yolo_model(
-    yaml_path: str, model_arch="yolov8n-obb.pt", epochs=50, imgsz=1024
-):
+def train_yolo_model(yaml_path: str, model_arch="yolov8n-obb.pt", epochs=50, imgsz=1024):
     model = YOLO(model_arch)
     model.train(data=yaml_path, epochs=epochs, imgsz=imgsz)
     return model

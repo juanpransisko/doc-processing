@@ -47,7 +47,9 @@ class AWBResolver:
         else:
             return 'bottom_right'
 
-    def resolve_by_region(self, predictions: List[Prediction]) -> Dict[str, Dict[str, AWBFieldResult]]:
+    def resolve_by_region(self, 
+                            predictions: List[Prediction]
+        ) -> Dict[str, Dict[str, AWBFieldResult]]:
         result = {'awb_prefix': {}, 'awb_serial': {}}
         for pred in predictions:
             region = self.categorize_region(pred.bbox)
@@ -76,4 +78,20 @@ class AWBResolver:
             "serial": serials[0] if consistent else None,
             "consistent": consistent
         }
+
+# Convert raw list to Prediction objects
+raw_preds = [
+    {'class': 1, 'bbox': [50, 50, 100, 100], 'value': '123', 'confidence': 0.95},
+    {'class': 2, 'bbox': [200, 200, 300, 300], 'value': '12345678', 'confidence': 0.92},
+    # etc.
+]
+predictions = [Prediction(p['class'], BBox(*p['bbox']), p['value'], p['confidence']) for p in raw_preds]
+
+resolver = AWBResolver(image_width=600, image_height=400)
+region_based = resolver.resolve_by_region(predictions)
+final_result = resolver.resolve_consistent(region_based)
+
+print(final_result)
+# Expected output: {'prefix': '123', 'serial': '12345678', 'consistent': True}
+
 
