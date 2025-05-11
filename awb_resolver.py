@@ -1,3 +1,4 @@
+
 from dataclasses import dataclass
 from typing import List, Dict, Optional
 import re
@@ -57,19 +58,37 @@ class AWBResolver:
             if pred.class_id == 1 and re.fullmatch(r"\d{3}", pred.value):
                 prev = result['awb_prefix'].get(region)
                 if not prev or pred.confidence > prev.confidence:
-                    result['awb_prefix'][region] = AWBFieldResult(pred.value, pred.confidence, region, pred.class_id)
+                    result['awb_prefix'][region] = AWBFieldResult(
+                        pred.value, 
+                        pred.confidence, 
+                        region, 
+                        pred.class_id
+                    )
 
             elif pred.class_id == 2 and re.fullmatch(r"\d{8}", pred.value):
                 prev = result['awb_serial'].get(region)
                 if not prev or pred.confidence > prev.confidence:
-                    result['awb_serial'][region] = AWBFieldResult(pred.value, pred.confidence, region, pred.class_id)
+                    result['awb_serial'][region] = AWBFieldResult(
+                            pred.value, 
+                            pred.confidence, 
+                            region, 
+                            pred.class_id
+                        )
 
         return result
 
-    def resolve_consistent(self, region_result: Dict[str, Dict[str, AWBFieldResult]]) -> Dict[str, Optional[str]]:
-        """Return final result if all zones agree, else None or fallback logic"""
-        prefixes = list({v.value for v in region_result['awb_prefix'].values()})
-        serials = list({v.value for v in region_result['awb_serial'].values()})
+    def resolve_consistent(self, 
+            region_result: Dict[str, Dict[str, AWBFieldResult]]
+        ) -> Dict[str, Optional[str]]:
+        """
+        Return final result if all zones agree, else None or fallback logic
+        """
+        prefixes = list(
+            {v.value for v in region_result['awb_prefix'].values()}
+        )
+        serials = list(
+            {v.value for v in region_result['awb_serial'].values()}
+        )
 
         consistent = len(prefixes) == 1 and len(serials) == 1
 
@@ -81,11 +100,25 @@ class AWBResolver:
 
 # Convert raw list to Prediction objects
 raw_preds = [
-    {'class': 1, 'bbox': [50, 50, 100, 100], 'value': '123', 'confidence': 0.95},
-    {'class': 2, 'bbox': [200, 200, 300, 300], 'value': '12345678', 'confidence': 0.92},
+    {
+        'class': 1, 
+        'bbox': [50, 50, 100, 100], 
+        'value': '123', 
+        'confidence': 0.95
+    },
+    {
+        'class': 2, 
+        'bbox': [200, 200, 300, 300], 
+        'value': '12345678', 
+        'confidence': 0.92
+    },
     # etc.
 ]
-predictions = [Prediction(p['class'], BBox(*p['bbox']), p['value'], p['confidence']) for p in raw_preds]
+
+predictions = [
+    Prediction(p['class'], BBox(*p['bbox']), p['value'], p['confidence']) 
+    for p in raw_preds
+]
 
 resolver = AWBResolver(image_width=600, image_height=400)
 region_based = resolver.resolve_by_region(predictions)
